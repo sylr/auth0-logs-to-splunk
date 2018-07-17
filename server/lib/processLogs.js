@@ -26,6 +26,9 @@ module.exports = (storage) =>
       maxBatchCount: 0 // Manually flush events
     });
 
+    Logger.eventFormatter = function (message, severity) {
+      return message;
+    };
 
     Logger.requestOptions = {
       timeout: 5000
