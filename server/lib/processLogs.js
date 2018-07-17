@@ -44,7 +44,20 @@ module.exports = (storage) =>
       const startTime = process.hrtime();
 
       logs.forEach(function (entry) {
-        Logger.send({ message: entry });
+        var payload = {};
+        payload.message = {};
+        payload.metadata = {};
+
+        // Try to unmarshall JSON for better compatibility with Splunk HEC
+        try {
+          var js = JSON.parse(entry);
+          payload.message = js;
+          payload.metadata.time = new Date(js.date).getTime() / 1000;
+        } catch (error) {
+          payload.message = entry;
+        }
+
+        Logger.send(payload);
       });
 
       logger.info(`Sending ${logs.length} logs to Splunk...`);
