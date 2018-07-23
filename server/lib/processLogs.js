@@ -61,7 +61,8 @@ module.exports = (storage) =>
             "error": {
                "name": err.name,
                "message": err.message,
-               "object": err
+               "object": err,
+               "pwet": typeof entry
             }
           };
         }
