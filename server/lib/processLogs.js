@@ -51,21 +51,11 @@ module.exports = (storage) =>
         payload.message = {};
         payload.metadata = {};
 
-        // Try to unmarshall JSON for better compatibility with Splunk HEC
-        try {
-          var js = JSON.parse(entry.replace(/\\/g, '\\\\'));
-          payload.metadata.time = new Date(js.date);
-          payload.message = js;
-        } catch (err) {
-          payload.message = {
-            "error": {
-               "name": err.name,
-               "message": err.message,
-               "object": err,
-               "pwet": typeof entry
-            }
-          };
+        if (typeof entry === 'object' && entry.hasOwnProperty('date')) {
+          payload.metadata.time = new Date(entry.date);
         }
+
+        payload.message = entry;
 
         Logger.send(payload);
       });
