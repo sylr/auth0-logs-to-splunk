@@ -56,8 +56,8 @@ module.exports = (storage) =>
           var js = JSON.parse(entry);
           payload.metadata.time = new Date(js.date);
           payload.message = js;
-        } catch (error) {
-          payload.message = {"error": error};
+        } catch (err) {
+          payload.message = {"error": {"name": err.name, "message": err.message, "object": err}};
         }
 
         Logger.send(payload);
