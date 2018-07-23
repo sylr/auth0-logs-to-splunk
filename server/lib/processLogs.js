@@ -54,10 +54,10 @@ module.exports = (storage) =>
         // Try to unmarshall JSON for better compatibility with Splunk HEC
         try {
           var js = JSON.parse(entry);
+          payload.metadata.time = new Date(js.date);
           payload.message = js;
-          payload.metadata.time = new Date(js.date).getTime() / 1000;
         } catch (error) {
-          payload.message = entry;
+          payload.message = {"error": error};
         }
 
         Logger.send(payload);
