@@ -1,6 +1,7 @@
 const moment = require('moment');
 const SplunkLogger = require('splunk-logging').Logger;
 const loggingTools = require('auth0-log-extension-tools');
+const useragent = require('useragent');
 
 const config = require('./config');
 const logger = require('./logger');
@@ -39,6 +40,21 @@ module.exports = (storage) =>
       logger.error('error', err, 'context', context);
     };
 
+    const remapLogs = (record) => {
+      record.type_code = record.type;
+      record.type = loggingTools.logTypes.get(record.type);
+
+      if (record.user_agent && record.user_agent.length) {
+        let agent = useragent.parse(record.user_agent);
+        record.os = agent.os.toString();
+        record.os_version = agent.os.toVersion();
+        record.device = agent.device.toString();
+        record.device_version = agent.device.toVersion();
+      }
+
+      return record;
+    };
+
     const onLogsReceived = (logs, cb) => {
       if (!logs || !logs.length) {
         return cb();
@@ -50,6 +66,8 @@ module.exports = (storage) =>
         var payload = {};
         payload.message = {};
         payload.metadata = {};
+
+        entry = remapLogs(entry);
 
         if (typeof entry === 'object' && entry.hasOwnProperty('date')) {
           payload.metadata.time = new Date(entry.date);
